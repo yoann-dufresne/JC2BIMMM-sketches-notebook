@@ -23,16 +23,7 @@ notebook.
 
 ## 🚀 Démarrer
 
-### Option 1 — Google Colab (recommandé, rien à installer)
-
-Cliquez sur le badge **« Open in Colab »** ci-dessus, ou ouvrez directement :
-
-<https://colab.research.google.com/github/yoann-dufresne/JC2BIMMM-sketches-notebook/blob/main/TP_sketches.ipynb>
-
-Puis, dans Colab, faites une copie dans votre Drive (`Fichier ▸ Enregistrer une
-copie dans Drive`) pour conserver votre travail.
-
-### Option 2 — En local avec Jupyter
+### Option 1 — En local avec Jupyter (recommandé)
 
 ```bash
 # 1. Récupérer le notebook
@@ -48,6 +39,17 @@ jupyter lab TP_sketches.ipynb
 
 Aucune autre dépendance : tout le code repose sur la bibliothèque standard de
 Python (`numpy`/`matplotlib` servent uniquement aux graphiques).
+
+### Option 2 — Google Colab (si l'installation locale ne fonctionne pas)
+
+Si vous ne parvenez pas à installer Jupyter, ouvrez le notebook directement dans
+votre navigateur, sans rien installer : cliquez sur le badge **« Open in
+Colab »** ci-dessus, ou ouvrez ce lien :
+
+<https://colab.research.google.com/github/yoann-dufresne/JC2BIMMM-sketches-notebook/blob/main/TP_sketches.ipynb>
+
+Puis faites une copie dans votre Drive (`Fichier ▸ Enregistrer une copie dans
+Drive`) pour conserver votre travail.
 
 ## 📋 Déroulé du TP
 
