@@ -104,6 +104,10 @@ ou directement : <https://github.com/yoann-dufresne/JC2BIMMM-sketches-notebook/t
 
 Auteur : **Yoann Dufresne**.
 
+Ce TP s'inspire largement du billet de blog de **Camille Marchet**,
+[*Sketching for set comparison in bioinformatics*](https://kamimrcht.github.io/webpage/sketch.html)
+(2022) — une excellente lecture pour approfondir les variantes de MinHash.
+
 Ce matériel pédagogique est distribué sous licence **GNU Affero General Public
 License v3.0** (AGPL-3.0). Voir le fichier [`LICENSE`](LICENSE).
 
