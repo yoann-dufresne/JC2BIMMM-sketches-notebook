@@ -503,14 +503,16 @@
       node[midway,above,font=\scriptsize,cOrange]{poids faible (aléatoires)};
     \draw[arr] (4.77,3.05)--(4.77,1.97);
     \node[above,font=\scriptsize] at (4.77,3.0){le 1 de poids le plus fort};
-    % --- la signature (16 bits) ---
-    \draw[cBlue,line width=1pt] (2.5,-1.05) rectangle (6.0,-0.5);
-    \node[cBlue,font=\scriptsize,align=center] at (4.25,-0.775){\textbf{6 bits} : sa position\\($\log_2 64 = 6$)};
-    \draw[cOrange,line width=1pt] (6.0,-1.05) rectangle (9.5,-0.5);
-    \node[cOrange,font=\scriptsize,align=center] at (7.75,-0.775){\textbf{10 bits}\\de poids faible};
-    \node[font=\scriptsize,anchor=west] at (9.75,-0.775){$=$ 16 bits};
-    \draw[arr,cBlue]   (4.77,1.4) to[out=-90,in=90] (4.25,-0.48);
-    \draw[arr,cOrange] (10.45,1.4) to[out=-90,in=90] (7.75,-0.48);
+    % --- la signature (16 bits) : barre proportionnelle 6:10, légendes en dessous ---
+    \fill[cBlue!30]   (2.6,-0.55) rectangle (5.0,-0.05);
+    \draw[cBlue]      (2.6,-0.55) rectangle (5.0,-0.05);
+    \fill[cOrange!45] (5.0,-0.55) rectangle (9.0,-0.05);
+    \draw[cOrange]    (5.0,-0.55) rectangle (9.0,-0.05);
+    \node[font=\scriptsize,anchor=west] at (9.2,-0.3){$=$ 16 bits};
+    \node[font=\scriptsize,cBlue,align=center,below] at (3.8,-0.62){\textbf{6 bits} : position du 1 fort\\($\log_2 64 = 6$)};
+    \node[font=\scriptsize,cOrange,align=center,below] at (7.0,-0.62){\textbf{10 bits} :\\poids faible};
+    \draw[arr,cBlue]   (4.77,1.4) to[out=-90,in=90] (3.8,-0.03);
+    \draw[arr,cOrange] (10.45,1.4) to[out=-90,in=90] (7.0,-0.03);
   \end{tikzpicture}
   \end{center}
 
