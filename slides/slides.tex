@@ -484,56 +484,39 @@
   on peut résumer l'essentiel sur bien moins de bits.}
 \end{frame}
 
-\begin{frame}[fragile]{HyperMin : un code de 16 bits par partition}
+\begin{frame}{HyperMin : la signature d'un minimum sur 16 bits}
   \footnotesize
-  Les bits de \emph{poids faible} choisissent la partition (\texttt{p = h \& (s-1)}) ;
-  on encode donc la partie \textbf{haute} \texttt{body = h {>}{>} p\_bits} sur \textbf{16 bits}.
-  \vspace{-2pt}
+  Un minimum gardé est \textbf{petit} : ses bits de \textbf{poids fort} sont surtout des 0,
+  ses bits de \textbf{poids faible} restent aléatoires. On le résume par deux infos.
+
   \begin{center}
-  \begin{tikzpicture}[scale=0.85]
-    % --- registre 64 bits ---
-    \fill[cGray!30] (0,1.2) rectangle (2.0,1.7);
-    \draw (0,1.2) rectangle (11.4,1.7);
-    \node[font=\ttfamily\scriptsize] at (0.95,1.45){0 0 0};
-    \node[font=\scriptsize] at (3.1,1.45){\ldots};
-    \draw[fill=black] (5.0,1.2) rectangle (5.35,1.7);
-    \draw[arr] (5.18,2.2)--(5.18,1.72);
-    \node[above,font=\scriptsize] at (5.18,2.15){position du premier 1};
-    \fill[cOrange!50] (9.5,1.2) rectangle (11.4,1.7);
-    \draw[decorate,decoration={brace,amplitude=3pt},cOrange]
-      (9.5,1.78)--(11.4,1.78) node[midway,above,font=\scriptsize,cOrange]{10 bits faibles};
-    \node[below,font=\scriptsize] at (0,1.2){0};
-    \node[below,font=\scriptsize] at (11.4,1.2){63};
-    % --- code 16 bits ---
-    \draw[cBlue,line width=1pt]  (3.0,-0.55) rectangle (6.0,0.0);
-    \node[cBlue,font=\scriptsize] at (4.5,-0.28){$\rho$ : 6 bits};
-    \node[below,font=\tiny,cBlue] at (3.0,-0.55){0};
-    \node[below,font=\tiny,cBlue] at (6.0,-0.55){5};
-    \draw[cOrange,line width=1pt] (6.0,-0.55) rectangle (9.0,0.0);
-    \node[cOrange,font=\scriptsize] at (7.5,-0.28){10 bits faibles};
-    \node[below,font=\tiny,cOrange] at (6.0,-0.55){6};
-    \node[below,font=\tiny,cOrange] at (9.0,-0.55){15};
-    \draw[arr,cBlue]   (5.18,1.2) to[out=-90,in=90] (4.5,0.02);
-    \draw[arr,cOrange] (10.4,1.2) to[out=-90,in=90] (7.5,0.02);
+  \begin{tikzpicture}[scale=0.82]
+    % --- le minimum (64 bits) ---
+    \draw (0,1.4) rectangle (11.4,1.95);
+    \fill[cGray!30] (0,1.4) rectangle (4.6,1.95);
+    \node[font=\ttfamily\scriptsize] at (1.6,1.675){0 0 0 0 \ldots 0};
+    \draw[fill=black] (4.6,1.4) rectangle (4.95,1.95);
+    \fill[cOrange!50] (9.5,1.4) rectangle (11.4,1.95);
+    \draw[decorate,decoration={brace,amplitude=3pt},cGray] (0,2.0)--(4.5,2.0)
+      node[midway,above,font=\scriptsize,cGray]{poids fort (sous pression)};
+    \draw[decorate,decoration={brace,amplitude=3pt},cOrange] (9.5,2.0)--(11.4,2.0)
+      node[midway,above,font=\scriptsize,cOrange]{poids faible (aléatoires)};
+    \draw[arr] (4.77,3.05)--(4.77,1.97);
+    \node[above,font=\scriptsize] at (4.77,3.0){le 1 de poids le plus fort};
+    % --- la signature (16 bits) ---
+    \draw[cBlue,line width=1pt] (2.5,-1.05) rectangle (6.0,-0.5);
+    \node[cBlue,font=\scriptsize,align=center] at (4.25,-0.775){\textbf{6 bits} : sa position\\($\log_2 64 = 6$)};
+    \draw[cOrange,line width=1pt] (6.0,-1.05) rectangle (9.5,-0.5);
+    \node[cOrange,font=\scriptsize,align=center] at (7.75,-0.775){\textbf{10 bits}\\de poids faible};
+    \node[font=\scriptsize,anchor=west] at (9.75,-0.775){$=$ 16 bits};
+    \draw[arr,cBlue]   (4.77,1.4) to[out=-90,in=90] (4.25,-0.48);
+    \draw[arr,cOrange] (10.45,1.4) to[out=-90,in=90] (7.75,-0.48);
   \end{tikzpicture}
   \end{center}
-  \vspace{-2pt}
-  \begin{columns}[c]
-    \begin{column}{0.7\textwidth}
-\begin{lstlisting}
-def hmh_code(body, w, r=10, rb=6):
-    rho = w if body == 0 else w - body.bit_length()
-    rho = min(rho, (1 << rb) - 1)
-    return (rho << r) | (body & ((1 << r) - 1))
-\end{lstlisting}
-    \end{column}
-    \begin{column}{0.29\textwidth}
-      \scriptsize
-      $\rho$ = zéros de tête de \texttt{body}.\par\smallskip
-      \texttt{array('H')} : 16 bits.\par\smallskip
-      \textcolor{cGray}{d'après HyperLogLog, Flajolet \emph{et al.} 2007}
-    \end{column}
-  \end{columns}
+
+  \textcolor{cGray}{Prendre le \textbf{minimum} contraint les bits de poids fort ($\to$ des 0) :
+  seule compte \emph{la position du 1 de poids fort}. Les bits de poids faible, plus
+  aléatoires, forment la \textbf{signature} discriminante.}
 \end{frame}
 
 \begin{frame}{Espace \& compromis mémoire / qualité}
