@@ -1,9 +1,9 @@
-SLIDES = slides
+SLIDES = slides slides_precision
 
-all: $(SLIDES).pdf
+all: $(addsuffix .pdf,$(SLIDES))
 
-$(SLIDES).pdf: $(SLIDES).tex
-	latexmk -xelatex -interaction=nonstopmode -halt-on-error $(SLIDES).tex
+%.pdf: %.tex
+	latexmk -xelatex -interaction=nonstopmode -halt-on-error $<
 
 clean:
 	latexmk -C

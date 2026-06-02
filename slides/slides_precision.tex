@@ -1,0 +1,209 @@
+% !TEX program = xelatex
+% Deck EXPÉRIMENTAL — précision de l'estimation de Jaccard.
+% Compiler avec XeLaTeX (Metropolis + Fira).  Utilise pgfplots.
+% Contenu fondé sur la revue de C. Marchet (kamimrcht.github.io/webpage/sketch.html)
+% et les articles qui y sont cités (Broder 1997 ; Li & Konig 2010 ; Flajolet+ 2007 ;
+% Ondov+ 2016 / Mash ; Yu & Weber 2017 / HyperMinHash ; Baker & Langmead 2019).
+\PassOptionsToPackage{table}{xcolor}
+\documentclass[aspectratio=169,11pt]{beamer}
+\usetheme[progressbar=frametitle, numbering=fraction, sectionpage=progressbar, block=fill]{metropolis}
+
+% Police Fira par nom de fichier via kpathsea (portable).
+\usepackage{fontspec}
+\setsansfont{FiraSans}[
+  Extension      = .otf,
+  UprightFont    = *-Regular, ItalicFont = *-Italic,
+  BoldFont       = *-SemiBold, BoldItalicFont = *-SemiBoldItalic,
+]
+\setmonofont{FiraMono}[Extension=.otf, UprightFont=*-Regular, BoldFont=*-Bold, Scale=MatchLowercase]
+
+\usepackage[french]{babel}
+\usepackage{csquotes}
+\usepackage{amsmath,amssymb}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,calc,decorations.pathreplacing,babel}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+\definecolor{cBlue}{HTML}{1F6FB2}
+\definecolor{cOrange}{HTML}{EB811B}
+\definecolor{cGreen}{HTML}{2E8B57}
+\definecolor{cRed}{HTML}{C0392B}
+\definecolor{cGray}{HTML}{9AA0A6}
+
+\tikzset{arr/.style={-{Stealth[length=2.3mm]}, line width=0.5pt}}
+
+\title{Précision de l'estimation de Jaccard}
+\subtitle{annexe expérimentale : variance, loi en $1/\sqrt{s}$, distance de Mash}
+\author{TP \textsc{Jc2bimmm}}
+\date{}
+\institute{d'après la revue de C.~Marchet et les articles cités}
+
+\begin{document}
+
+\maketitle
+
+%% ----------------------------------------------------------------
+\begin{frame}{La question : quelle confiance dans $\hat J$ ?}
+  \footnotesize
+  On remplace des millions de k-mers par \textbf{$s$ valeurs}, puis on estime
+  $\hat J = x/s$ ($x$ = nombre de positions \emph{concordantes}).
+  \medskip
+
+  Avec le \textbf{partition sketch}, les $s$ cases sont \textbf{indépendantes} :
+  chaque case concorde avec probabilité $J$ (le vrai Jaccard). Autant de tirages
+  \enquote{pile ou face}.
+
+  \begin{center}
+  \begin{tikzpicture}
+    \foreach \i/\c in {0/{\textcolor{cGreen}{\checkmark}}, 1/{\textcolor{cGreen}{\checkmark}},
+                       2/{\textcolor{cRed}{$\times$}}, 3/{\textcolor{cGreen}{\checkmark}},
+                       4/{\textcolor{cRed}{$\times$}}, 5/{\textcolor{cGreen}{\checkmark}},
+                       6/{\textcolor{cGreen}{\checkmark}}, 7/{\textcolor{cRed}{$\times$}}}
+      \node[draw,minimum size=6.5mm] at (\i*0.8,0){\c};
+    \draw[decorate,decoration={brace,mirror,amplitude=4pt}] (-0.35,-0.45)--(6.0,-0.45)
+      node[midway,below,font=\scriptsize]{$s$ cases};
+    \node[anchor=west,font=\scriptsize] at (6.4,0){$x=5 \Rightarrow \hat J = 5/8$};
+  \end{tikzpicture}
+  \end{center}
+  \centering\footnotesize\textcolor{cGray}{De combien $\hat J$ s'écarte-t-il de $J$ ?}
+\end{frame}
+
+%% ----------------------------------------------------------------
+\begin{frame}{Le modèle binomial}
+  \footnotesize
+  Le nombre de concordances $X$ suit une loi \textbf{binomiale} :
+  \[ X \sim \mathcal{B}(s, J), \qquad \hat J = \frac{X}{s}. \]
+  \begin{columns}[T]
+    \begin{column}{0.54\textwidth}
+      \textbf{Sans biais :} $\mathbb{E}[\hat J] = J$.
+      \medskip
+
+      \textbf{Variance :}
+      \[ \operatorname{Var}(\hat J) = \frac{J(1-J)}{s},
+         \quad \sigma = \sqrt{\frac{J(1-J)}{s}}. \]
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \begin{alertblock}{Loi de l'erreur}
+        \footnotesize
+        \[ \varepsilon = O\!\left(\frac{1}{\sqrt{s}}\right) \]
+        Indépendante de la taille du génome \textit{(Mash)}.
+      \end{alertblock}
+    \end{column}
+  \end{columns}
+  \medskip
+  \centering
+  \textcolor{cGreen}{\textbf{Diviser l'erreur par 2 $\Rightarrow$ multiplier $s$ par 4.}}
+\end{frame}
+
+%% ----------------------------------------------------------------
+\begin{frame}{L'erreur décroît en $1/\sqrt{s}$}
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      width=10.2cm, height=5.4cm,
+      xmode=log, ymode=log, log basis x=2,
+      xlabel={taille du sketch $s$}, ylabel={écart-type $\sigma(\hat J)$},
+      xmin=16, xmax=8192, ymin=0.004, ymax=0.2,
+      grid=both, grid style={gray!18},
+      tick label style={font=\scriptsize}, label style={font=\footnotesize},
+      legend cell align=left, legend style={font=\scriptsize, at={(0.97,0.97)}, anchor=north east},
+    ]
+      \addplot[cBlue,  very thick, samples=80, domain=16:8192] {sqrt(0.25/x)};
+      \addlegendentry{$J=0{,}5$ \;(variance max)}
+      \addplot[cOrange,very thick, samples=80, domain=16:8192] {sqrt(0.09/x)};
+      \addlegendentry{$J=0{,}1$ ou $0{,}9$}
+    \end{axis}
+  \end{tikzpicture}
+
+  \footnotesize\textcolor{cGray}{En échelle log--log, une \textbf{droite de pente $-\tfrac12$} :
+  $\sigma \propto 1/\sqrt{s}$. La variance est maximale à $J=0{,}5$.}
+\end{frame}
+
+%% ----------------------------------------------------------------
+\begin{frame}{Intervalle de confiance \& limites}
+  \footnotesize
+  \textbf{IC à 95\,\%} (approximation normale) :
+  \[ \hat J \;\pm\; 1{,}96\,\sqrt{\frac{\hat J\,(1-\hat J)}{s}}. \]
+  \begin{itemize}
+    \item La variance \emph{absolue} est maximale à $J=0{,}5$ ; mais en \textbf{relatif},
+          ce sont les \textbf{petits $J$} (génomes éloignés) qui souffrent : signal faible
+          $\Rightarrow$ il faut un $s$ plus grand.
+    \item \textcolor{cGray}{Rappel (revue) : le proxy Jaccard se dégrade quand les ensembles
+          sont \emph{dissemblables} ou de \emph{tailles très différentes} $\Rightarrow$ on lui
+          préfère alors la \emph{containment} (Jaccard de confinement).}
+  \end{itemize}
+\end{frame}
+
+%% ----------------------------------------------------------------
+\begin{frame}{De Jaccard à une distance : Mash}
+  \footnotesize
+  Mash convertit le Jaccard estimé $j$ en une distance proche de $1-\text{ANI}$ :
+  \[ \boxed{\,D = -\frac{1}{k}\,\ln\!\frac{2j}{1+j}\,}
+     \qquad \text{\scriptsize(Ondov \textit{et al.} 2016)} \]
+  \begin{columns}[T]
+    \begin{column}{0.56\textwidth}
+      \textbf{Modèle de Poisson :} la probabilité qu'un k-mer \emph{échappe} à toute
+      mutation (taux $d$) vaut $e^{-k d}$ — d'où le lien entre fraction de k-mers
+      partagés et distance.
+      \smallskip
+
+      L'erreur sur $j$ (en $1/\sqrt{s}$) se \textbf{propage} à $D$.
+    \end{column}
+    \begin{column}{0.44\textwidth}
+      \begin{exampleblock}{Exemple chiffré (Mash)}
+        \footnotesize
+        $s = 1000$, $D = 0{,}05$ :\\
+        erreur $< 0{,}0068$ avec probabilité $0{,}99$.
+      \end{exampleblock}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+%% ----------------------------------------------------------------
+\begin{frame}{Compresser : que coûte la précision ?}
+  \footnotesize
+  \begin{itemize}
+    \item \textbf{b-bit MinHash} (Li \& König 2010) : ne garder que $b$ bits par haché
+          $\Rightarrow$ collisions \emph{aléatoires} (proba $\approx 2^{-b}$) ; un estimateur
+          \textbf{corrigé} retire ce biais, au prix d'un peu de variance — pour beaucoup
+          moins de mémoire.
+    \item \textbf{HyperMinHash} (Yu \& Weber 2017) : exposant \textsc{hll} (zéros de tête,
+          $O(\log\log n)$ bits) $+$ mantisse $b$-bit $\Rightarrow \sim 16$ bits/case ;
+          erreur relative $\varepsilon$ avec $\sim \varepsilon^{-2}$ cases.
+    \item \textbf{HyperLogLog} (Flajolet \textit{et al.} 2007) : cardinalité à
+          $\approx 1{,}04/\sqrt{m}$ ($m$ registres).
+  \end{itemize}
+  \begin{alertblock}{Compromis}
+    \footnotesize
+    À \textbf{mémoire égale}, plus de cases $\Rightarrow$ variance plus faible.
+    Les collisions de la compression $\Rightarrow$ léger \textbf{biais} (surestimation),
+    atténué par de plus gros sketches.
+  \end{alertblock}
+\end{frame}
+
+%% ----------------------------------------------------------------
+\begin{frame}{Références}
+  \footnotesize
+  \begin{itemize}
+    \item \textbf{Broder} (1997). \textit{On the resemblance and containment of documents} — MinHash.
+    \item \textbf{Li \& König} (2010). \textit{b-Bit Minwise Hashing} — WWW.
+    \item \textbf{Flajolet, Fusy, Gandouet, Meunier} (2007). \textit{HyperLogLog} — AofA.
+    \item \textbf{Ondov \textit{et al.}} (2016). \textit{Mash: fast genome and metagenome distance
+          estimation using MinHash} — Genome Biology.
+    \item \textbf{Yu \& Weber} (2017). \textit{HyperMinHash} — arXiv:1710.08436.
+    \item \textbf{Baker \& Langmead} (2019). \textit{Dashing: fast and accurate genomic distances
+          with HyperLogLog} — Genome Biology.
+  \end{itemize}
+  \vfill
+  {\scriptsize\textcolor{cGray}{Synthèse : revue de C.~Marchet,
+  \texttt{kamimrcht.github.io/webpage/sketch.html}.}}
+\end{frame}
+
+\begin{frame}[standout]
+  La précision se résume à une loi :\\[2pt]
+  \alert{$\sigma(\hat J) = \sqrt{J(1-J)/s}$}\\[4pt]
+  plus de cases, moins d'erreur — en $1/\sqrt{s}$.
+\end{frame}
+
+\end{document}
