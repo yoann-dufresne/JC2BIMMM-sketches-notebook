@@ -261,28 +261,25 @@ def hash64(x, bits):   # melange les bits
   \end{columns}
 \end{frame}
 
-\begin{frame}[fragile]{Bottom-$s$ MinHash : garder les $s$ plus petits hachés}
+\begin{frame}{Bottom-$s$ MinHash : garder les $s$ plus petits hachés}
   \begin{columns}[T]
-    \begin{column}{0.52\textwidth}
+    \begin{column}{0.5\textwidth}
       \footnotesize
       Sélectionner les \textbf{$s$ plus petits hachés} = tirer un \textbf{échantillon
       aléatoire uniforme} des k-mers, \emph{cohérent} d'un génome à l'autre
       (mêmes k-mers $\to$ mêmes petits hachés).
       \medskip
 
-      Mécanique avec un \texttt{set} :
-\begin{lstlisting}
-if len(kept) < s:           # pas plein
-    kept.add(kmer)
-elif kmer < current_max:    # sinon, < max
-    kept.discard(current_max)
-    kept.add(kmer)
-    current_max = max(kept)
-\end{lstlisting}
-      \smallskip
+      \textbf{Principe à coder :} maintenir l'ensemble des $s$ plus petits hachés vus.
+      \begin{itemize}
+        \item moins de $s$ gardés : on \textbf{ajoute} ;
+        \item sinon, si le nouveau $<$ \textbf{plus grand gardé} : il le \textbf{remplace} ;
+        \item sinon : on l'\textbf{ignore}.
+      \end{itemize}
+      \medskip
       Jaccard estimé : $\hat J = \dfrac{|S_A\cap S_B|}{|S_A\cup S_B|}$.
     \end{column}
-    \begin{column}{0.48\textwidth}
+    \begin{column}{0.5\textwidth}
       \centering
       \begin{tikzpicture}
         \draw[-{Stealth}] (0,0)--(5,0) node[right,font=\scriptsize]{$2^b$};
@@ -292,11 +289,15 @@ elif kmer < current_max:    # sinon, < max
         \foreach \x in {0.3,0.6,1.0,1.5}
           \draw[cBlue,line width=1.1pt] (\x,0.22)--(\x,-0.22);
         \draw[decorate,decoration={brace,amplitude=4pt},cBlue]
-          (0.25,0.4)--(1.55,0.4)
-          node[midway,above,font=\scriptsize,cBlue]{$s$ plus petits};
-        \node[font=\scriptsize,cGray,align=center] at (3.3,-0.7)
-          {les autres k-mers\\sont ignorés};
+          (0.25,0.45)--(1.55,0.45)
+          node[midway,above,font=\scriptsize,cBlue]{sketch = $s$ plus petits};
+        \draw[arr,cRed] (1.5,-0.95)--(1.5,-0.28);
+        \node[font=\scriptsize,cRed,align=center] at (1.5,-1.3){plus grand\\gardé};
+        \node[font=\scriptsize,cGray,align=center] at (3.6,-0.7){les autres\\sont ignorés};
       \end{tikzpicture}
+
+      \vspace{4pt}
+      {\scriptsize\color{cGray} À vous : implémentez \texttt{add\_kmers}.}
     \end{column}
   \end{columns}
 \end{frame}
