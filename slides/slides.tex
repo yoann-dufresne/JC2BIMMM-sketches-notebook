@@ -222,33 +222,29 @@
 %% ================================================================ PARTIE 2
 \section{Hachage \& Bottom-$s$ MinHash}
 
-\begin{frame}[fragile]{Qu'est-ce qu'une fonction de hachage ?}
+\begin{frame}{Qu'est-ce qu'une fonction de hachage ?}
   \begin{columns}[T]
-    \begin{column}{0.52\textwidth}
+    \begin{column}{0.54\textwidth}
       \footnotesize
-      Une fonction de hachage \texttt{h} \textbf{mélange les bits} d'un entier :
+      Une fonction de hachage \texttt{h} prend un entier et en renvoie un autre,
+      en \textbf{mélangeant ses bits}. Trois propriétés suffisent :
       \begin{itemize}
         \item \textbf{déterministe} : même entrée $\to$ même sortie ;
         \item \textbf{(quasi-)uniforme} sur $[0,2^b)$ ;
         \item \textbf{casse la proximité} : deux k-mers voisins $\to$ valeurs très éloignées.
       \end{itemize}
       \textcolor{cGray}{On veut de la \emph{diversité}, pas des k-mers qui se ressemblent.}
-\begin{lstlisting}
-def hash64(x, bits):   # melange les bits
-    mask = (1 << bits) - 1
-    x ^= 0x9E3779B97F4A7C15
-    x = (x ^ (x << 13)) & mask
-    x = (x ^ (x >>  7)) & mask
-    x = (x ^ (x << 17)) & mask
-    return x
-\end{lstlisting}
+      \medskip
+
+      \textbf{Une boîte noire :} peu importe \emph{comment} elle calcule.
+      Il en existe beaucoup (MurmurHash, xxHash, xorshift\ldots) — on en choisit une.
     \end{column}
-    \begin{column}{0.48\textwidth}
+    \begin{column}{0.46\textwidth}
       \centering
       \begin{tikzpicture}
         \node[nt] (x1) at (0,0.6) {x};
         \node[nt,minimum width=9mm] (x2) at (0,-0.6) {x+1};
-        \node[draw,rounded corners,fill=cPurple!15,minimum height=1.7cm,minimum width=1.1cm] (h) at (1.7,0) {$h$};
+        \node[draw,rounded corners,fill=black,text=white,minimum height=1.7cm,minimum width=1.2cm] (h) at (1.8,0) {$h$};
         \draw[arr] (x1)--(h); \draw[arr] (x2)--(h);
         \draw[-{Stealth}] (0.2,-1.9)--(4.2,-1.9) node[right,font=\scriptsize]{$2^b$};
         \node[font=\scriptsize] at (0.2,-2.2){0};
@@ -256,6 +252,7 @@ def hash64(x, bits):   # melange les bits
         \draw[cOrange,line width=1pt](3.4,-1.75)--(3.4,-2.05) node[below,font=\scriptsize,cOrange]{$h(x{+}1)$};
         \draw[arr,cGray] (h.east) to[out=0,in=110] (1.4,-1.7);
         \draw[arr,cGray] (h.east) to[out=0,in=100] (3.4,-1.7);
+        \node[font=\scriptsize,cGray] at (1.8,-2.65){une boîte noire};
       \end{tikzpicture}
     \end{column}
   \end{columns}
