@@ -347,30 +347,37 @@
 %% ================================================================ PARTIE 3
 \section{Partition sketch}
 
-\begin{frame}{Le problème : comparer impose un tri}
+\begin{frame}{Les deux coûts du bottom-$s$}
   \footnotesize
-  Dans le bottom-$s$, les $s$ valeurs gardées dépendent d'un \textbf{ordre global}
-  (les plus petites parmi \emph{toutes}). Deux sketches n'ont donc pas les mêmes
-  valeurs aux mêmes positions : pour calculer $|S_A\cap S_B|$, il faut
-  \textbf{trier / fusionner}.
-  \medskip
+  Les $s$ valeurs gardées dépendent d'un \textbf{ordre global} (les plus petites parmi
+  \emph{toutes}) — d'où \textbf{deux} coûts.
+  \smallskip
 
+  \textbf{1. Construction (mise à jour).} Un k-mer plus petit que le max \emph{met le
+  sketch à jour}, en $O(\log s)$ (réordonner le tas) — potentiellement à \emph{chaque}
+  k-mer. \textcolor{cGray}{Sur $n \gg s$ les mises à jour se raréfient ($\Rightarrow$ coût
+  \textbf{amorti}), mais pas forcément anodin.}
+  \smallskip
+
+  \textbf{2. Comparaison.} Deux sketches n'ont pas les mêmes valeurs aux mêmes positions :
+  pour $|S_A\cap S_B|$ il faut \textbf{trier / fusionner} $\Rightarrow \mathbf{O(s\log s)}$.
+
+  \medskip
   \centering
-  \begin{tikzpicture}
+  \begin{tikzpicture}[scale=0.9]
     \node[font=\scriptsize,cGray,anchor=east] at (-0.3,0.6){$S_A$ :};
     \foreach \v/\i in {3/0,9/1,12/2,20/3} \node[cell,fill=cBlue!12] at (\i*1.0,0.6){\v};
     \node[font=\scriptsize,cGray,anchor=east] at (-0.3,-0.6){$S_B$ :};
     \foreach \v/\i in {5/0,9/1,11/2,20/3} \node[cell,fill=cOrange!12] at (\i*1.0,-0.6){\v};
-    \node[draw,rounded corners,minimum height=1.6cm,fill=cGray!12] (m) at (4.6,0){fusion};
+    \node[draw,rounded corners,minimum height=1.5cm,fill=cGray!12] (m) at (4.6,0){fusion};
     \draw[arr] (3.55,0.6) -- (m.west|-0,0.3);
     \draw[arr] (3.55,-0.6) -- (m.west|-0,-0.3);
     \draw[arr] (m.east) -- +(0.9,0) node[right,font=\scriptsize]{$|S_A\cap S_B|$};
   \end{tikzpicture}
 
-  \medskip
-  \begin{alertblock}{Coût}
-    \footnotesize Trier / fusionner deux sketches de taille $s$ : $\mathbf{O(s\log s)}$.
-  \end{alertblock}
+  \smallskip
+  {\footnotesize\textcolor{cGreen}{$\Rightarrow$ on aimerait des cases \textbf{indépendantes} :
+  ni tas à réordonner, ni tri.}}
 \end{frame}
 
 \begin{frame}{Partition sketch de taille $s$}
